@@ -22,8 +22,13 @@ public class Kinematic : MonoBehaviour
     public Kinematic[] targets;
     PathFollow follow = new PathFollow();
     LookWhereGoing lookwg = new LookWhereGoing();
+	SteeringOutput steeringUpdate = new SteeringOutput();
+
 	BlendedSteering mySteering;
+	public GameObject myCohereTarget;
+    PrioritySteering myAdvancedSteering = new PrioritySteering();
 	Kinematic[] kBirds;
+	public bool avoidObstacles = false;
 	//public GameObject myCohereTarget;
 
     // Update is called once per frame
@@ -195,50 +200,79 @@ public class Kinematic : MonoBehaviour
                 break;
 			case steeringBehaviors.Flocker:
 				//Separate from other birds
-			Separate flockSeparate = new Separate();
-			flockSeparate.character = this;
-			GameObject[] goBirds = GameObject.FindGameObjectsWithTag("bird");
-			kBirds = new Kinematic[goBirds.Length-1];
-			int j = 0;
-			for (int i=0; i<goBirds.Length-1; i++)
-			{
-				if (goBirds[i] == this)
-				{
-					continue;
-				}
-				kBirds[j++] = goBirds[i].GetComponent<Kinematic>();
-			}
-			flockSeparate.targets = kBirds;
-
-			// Cohere to center of mass - ez mode
-			Arrive cohere = new Arrive();
-			cohere.character = this;
-			cohere.target = newTarget;
-
-			// look where center of mass is going - ez mode
-			LookWhereGoing myRotateType = new LookWhereGoing();
-			myRotateType.character = this;
-			myRotateType.target = newTarget;
-			mySteering = new BlendedSteering();
-			mySteering.behaviors = new BehaviorAndWeight[3];
-			mySteering.behaviors[0] = new BehaviorAndWeight();
-			mySteering.behaviors[0].behavior = flockSeparate;
-			mySteering.behaviors[0].weight = 1f; //3
-			mySteering.behaviors[1] = new BehaviorAndWeight();
-			mySteering.behaviors[1].behavior = cohere;
-			mySteering.behaviors[1].weight = 1f; //.5
-			mySteering.behaviors[2] = new BehaviorAndWeight();
-			mySteering.behaviors[2].behavior = myRotateType;
-			mySteering.behaviors[2].weight = 1f;
-			SteeringOutput steeringUpdate = new SteeringOutput();
-			steeringUpdate = mySteering.getSteering();
-			if (steeringUpdate != null)
+				Separate flockSeparate = new Separate();
+				  Arrive arriveFlock = new Arrive();
+                LookWhereGoing lwgFlock = new LookWhereGoing();
+                BlendedSteering mySteering = new BlendedSteering();
+				flockSeparate.character = this;
+				GameObject[] goBirds = GameObject.FindGameObjectsWithTag("bird");
+				 kBirds = new Kinematic[goBirds.Length - 1];
+                int j = 0;
+                for (int i = 0; i < goBirds.Length - 1; i++)
                 {
-                    linear += steeringUpdate.linear * Time.deltaTime;
-                    angular += steeringUpdate.angular * Time.deltaTime;
+                    if (goBirds[i] == this)
+                    {
+                        continue;
+                    }
+                    kBirds[j++] = goBirds[i].GetComponent<Kinematic>();
                 }
-			break;
+                flockSeparate.targets = kBirds;
+                
+                arriveFlock.character = this;
+                //Debug.Log(arriveFlock.character);
+                arriveFlock.target = newTarget;
+                //Debug.Log(arriveFlock.target);
+                lwgFlock.character = this;
+                lwgFlock.target = newTarget;
+                mySteering.behaviors = new BehaviorAndWeight[3];
+                mySteering.behaviors[0] = new BehaviorAndWeight();
+                mySteering.behaviors[0].behavior = flockSeparate;
+                mySteering.behaviors[0].weight = 1f; 
+                mySteering.behaviors[1] = new BehaviorAndWeight();
+                mySteering.behaviors[1].behavior = arriveFlock;
+                mySteering.behaviors[1].weight = 1f; 
+                mySteering.behaviors[2] = new BehaviorAndWeight();
+                mySteering.behaviors[2].behavior = lwgFlock;
+                mySteering.behaviors[2].weight = 1f;
 
+                ObstacleAvoidance myAvoid = new ObstacleAvoidance();
+                myAvoid.character = this;
+                myAvoid.target = newTarget;
+                myAvoid.flee = true; 
+
+                BlendedSteering myHighPrioritySteering = new BlendedSteering();
+                myHighPrioritySteering.behaviors = new BehaviorAndWeight[1];
+                myHighPrioritySteering.behaviors[0] = new BehaviorAndWeight();
+                myHighPrioritySteering.behaviors[0].behavior = myAvoid;
+                myHighPrioritySteering.behaviors[0].weight = 0.1f;
+                myAdvancedSteering.groups = new BlendedSteering[2];
+                myAdvancedSteering.groups[0] = new BlendedSteering();
+                myAdvancedSteering.groups[0] = myHighPrioritySteering;
+                myAdvancedSteering.groups[1] = new BlendedSteering();
+                myAdvancedSteering.groups[1] = mySteering;
+
+                //steeringUpdate = mySteering.getSteering();
+                avoidObstacles = true;
+                if (!avoidObstacles)
+                {
+                    steeringUpdate = mySteering.getSteering();
+                    if (steeringUpdate != null)
+                    {
+                        linear += steeringUpdate.linear * Time.deltaTime;
+                        angular += steeringUpdate.angular * Time.deltaTime;
+                    }
+                }
+                else
+                {
+                    steeringUpdate = myAdvancedSteering.getSteering();
+                    if (steeringUpdate != null)
+                    {
+                        linear += steeringUpdate.linear * Time.deltaTime;
+                        angular += steeringUpdate.angular * Time.deltaTime;
+                    }
+                }
+                break;
+                
 
         }
 
