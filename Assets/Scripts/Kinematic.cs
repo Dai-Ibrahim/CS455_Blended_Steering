@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -202,7 +202,7 @@ public class Kinematic : MonoBehaviour
 				//Separate from other birds
 				Separate flockSeparate = new Separate();
 				  Arrive arriveFlock = new Arrive();
-                LookWhereGoing lwgFlock = new LookWhereGoing();
+                LookWhereGoing FlockLookWhereGoing = new LookWhereGoing();
                 BlendedSteering mySteering = new BlendedSteering();
 				flockSeparate.character = this;
 				GameObject[] goBirds = GameObject.FindGameObjectsWithTag("bird");
@@ -222,8 +222,8 @@ public class Kinematic : MonoBehaviour
                 //Debug.Log(arriveFlock.character);
                 arriveFlock.target = newTarget;
                 //Debug.Log(arriveFlock.target);
-                lwgFlock.character = this;
-                lwgFlock.target = newTarget;
+                FlockLookWhereGoing.character = this;
+                FlockLookWhereGoing.target = newTarget;
                 mySteering.behaviors = new BehaviorAndWeight[3];
                 mySteering.behaviors[0] = new BehaviorAndWeight();
                 mySteering.behaviors[0].behavior = flockSeparate;
@@ -232,7 +232,7 @@ public class Kinematic : MonoBehaviour
                 mySteering.behaviors[1].behavior = arriveFlock;
                 mySteering.behaviors[1].weight = 1f; 
                 mySteering.behaviors[2] = new BehaviorAndWeight();
-                mySteering.behaviors[2].behavior = lwgFlock;
+                mySteering.behaviors[2].behavior = FlockLookWhereGoing;
                 mySteering.behaviors[2].weight = 1f;
 
                 ObstacleAvoidance myAvoid = new ObstacleAvoidance();
@@ -244,7 +244,7 @@ public class Kinematic : MonoBehaviour
                 myHighPrioritySteering.behaviors = new BehaviorAndWeight[1];
                 myHighPrioritySteering.behaviors[0] = new BehaviorAndWeight();
                 myHighPrioritySteering.behaviors[0].behavior = myAvoid;
-                myHighPrioritySteering.behaviors[0].weight = 0.1f;
+                myHighPrioritySteering.behaviors[0].weight = 1f;
                 myAdvancedSteering.groups = new BlendedSteering[2];
                 myAdvancedSteering.groups[0] = new BlendedSteering();
                 myAdvancedSteering.groups[0] = myHighPrioritySteering;
