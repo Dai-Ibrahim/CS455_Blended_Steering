@@ -22,14 +22,13 @@ public class Kinematic : MonoBehaviour
     public Kinematic[] targets;
     PathFollow follow = new PathFollow();
     LookWhereGoing lookwg = new LookWhereGoing();
-	SteeringOutput steeringUpdate = new SteeringOutput();
+    SteeringOutput steeringUpdate = new SteeringOutput();
 
-	BlendedSteering mySteering;
-	public GameObject myCohereTarget;
+    BlendedSteering mySteering;
+    public GameObject myCohereTarget;
     PrioritySteering myAdvancedSteering = new PrioritySteering();
-	Kinematic[] kBirds;
-	public bool avoidObstacles = false;
-	//public GameObject myCohereTarget;
+    Kinematic[] kBirds;
+    public bool avoidObstacles = false;
 
     // Update is called once per frame
     void Update()
@@ -245,6 +244,7 @@ public class Kinematic : MonoBehaviour
                 myHighPrioritySteering.behaviors[0] = new BehaviorAndWeight();
                 myHighPrioritySteering.behaviors[0].behavior = myAvoid;
                 myHighPrioritySteering.behaviors[0].weight = 1f;
+		
                 myAdvancedSteering.groups = new BlendedSteering[2];
                 myAdvancedSteering.groups[0] = new BlendedSteering();
                 myAdvancedSteering.groups[0] = myHighPrioritySteering;
